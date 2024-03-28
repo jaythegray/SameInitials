@@ -4,39 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Initials Population Estimator</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        #results { margin-top: 20px; padding: 10px; background-color: #f0f0f0; border-radius: 5px; }
+        body { padding: 20px; }
+        .loading-spinner { display: none; }
     </style>
 </head>
 <body>
+<div class="container">
     <h2>Enter Your Initials</h2>
     <p>Type up to three initials and click "Estimate" to see how many people might share them globally.</p>
-    <input type="text" id="initials" placeholder="ABC" maxlength="3">
-    <button onclick="submitInitials()">Estimate</button>
+    <input type="text" id="initials" class="form-control" placeholder="Up to 3 initials, e.g., ABC" maxlength="3">
+    <button class="btn btn-primary mt-2" onclick="submitInitials()">Estimate</button>
+    <div id="results" class="mt-3"></div>
+    <div class="loading-spinner"><img src="spinner.gif" alt="Loading..."></div>
+</div>
 
-    <div id="results"></div>
-
-    <script>
-        function submitInitials() {
-            const initialsInput = document.getElementById('initials').value.toUpperCase();
-            const initials = initialsInput.split('').filter(char => /[A-Z]/.test(char)); // Ensure only letters are sent
-            fetch('/estimate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ initials }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('results').innerHTML = `<p>${data.result}</p>`;
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-                document.getElementById('results').textContent = 'Error processing your request. Please try again.';
-            });
+<script>
+    function submitInitials() {
+        const initialsInput = document.getElementById('initials').value.toUpperCase().trim();
+        const initials = initialsInput.split('').filter(char => /[A-Z]/.test(char));
+        
+        if (initials.length === 0 || initials.length > 3) {
+            document.getElementById('results').innerHTML = '<p class="text-warning">Please enter 1 to 3 alphabetic characters.</p>';
+            return;
         }
-    </script>
+        
+        document.querySelector('.loading-spinner').style.display = 'block';
+        
+        fetch('/estimate', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ initials }),
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok.');
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById('results').innerHTML = `<p class="text-success">${data.result}</p>`;
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            document.getElementById('results').innerHTML = '<p class="text-danger">Error processing your request. Please try again.</p>';
+        })
+        .finally(() => {
+            document.querySelector('.loading-spinner').style.display = 'none';
+        });
+    }
+</script>
 </body>
 </html>

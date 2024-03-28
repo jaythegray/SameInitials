@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Initials Estimator</title>
+</head>
+<body>
+    <h2>Enter Initials</h2>
+    <input type="text" id="initials" placeholder="Type initials here...">
+    <button onclick="submitInitials()">Estimate</button>
+    <div id="results"></div>
+
+    <script>
+        function submitInitials() {
+            const initials = document.getElementById('initials').value.toUpperCase().split('');
+            fetch('/estimate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ initials }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('results').textContent = data.result;
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>

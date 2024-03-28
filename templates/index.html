@@ -3,17 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Initials Estimator</title>
+    <title>Initials Population Estimator</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #results { margin-top: 20px; padding: 10px; background-color: #f0f0f0; border-radius: 5px; }
+    </style>
 </head>
 <body>
-    <h2>Enter Initials</h2>
-    <input type="text" id="initials" placeholder="Type initials here...">
+    <h2>Enter Your Initials</h2>
+    <p>Type up to three initials and click "Estimate" to see how many people might share them globally.</p>
+    <input type="text" id="initials" placeholder="ABC" maxlength="3">
     <button onclick="submitInitials()">Estimate</button>
+
     <div id="results"></div>
 
     <script>
         function submitInitials() {
-            const initials = document.getElementById('initials').value.toUpperCase().split('');
+            const initialsInput = document.getElementById('initials').value.toUpperCase();
+            const initials = initialsInput.split('').filter(char => /[A-Z]/.test(char)); // Ensure only letters are sent
             fetch('/estimate', {
                 method: 'POST',
                 headers: {
@@ -23,10 +30,11 @@
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('results').textContent = data.result;
+                document.getElementById('results').innerHTML = `<p>${data.result}</p>`;
             })
             .catch((error) => {
                 console.error('Error:', error);
+                document.getElementById('results').textContent = 'Error processing your request. Please try again.';
             });
         }
     </script>
